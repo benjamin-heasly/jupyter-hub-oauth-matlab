@@ -20,5 +20,5 @@ Here are the site-specific configs you need:
 # Thanks
 This image was inspired by the jupyterhub official [oauthenticator example](https://github.com/jupyterhub/oauthenticator/tree/master/example).  Thanks!
 
-Thanks also to Michael Albert at Stanford for info, inspiration, starter code!
+Thanks also to Michael Perry at Stanford for info, inspiration, starter code!
 
