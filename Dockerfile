@@ -42,6 +42,9 @@ RUN pip install pyzmq \
 # wrapper to start mounted-in matlab, plus MATLABPATH=/usr/local/MATLAB/
 ADD matlab /usr/local/bin/matlab
 
+# shared Matlab demo notebook
+ADD MatlabWelcome.ipynb /srv/ipython/examples/MatlabWelcome.ipynb
+
 # standard place where other Docker images can add toolboxes
 RUN mkdir -p /usr/local/MATLAB/toolboxes
 ADD setToolboxPath.m /usr/local/MATLAB/setToolboxPath.m
