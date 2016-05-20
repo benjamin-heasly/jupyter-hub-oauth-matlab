@@ -15,15 +15,13 @@
 
 
 # A folder to contain all this site-specific config.
-mkdir -p ~/jupyter-hub-oauth-matlab/site-config
-cd ~/jupyter-hub-oauth-matlab/site-config
-WORKING=`pwd`
+WORKING=/home/you/jupyter/deploy/jupyter-hub-oauth-matlab/site-config
 
 
 # Build a userlist file with one line per user.
 # Lines ending with "admin" declare admin users.  Like you!
 echo "you@gmail.com admin" > $WORKING/userlist
-echo "another.user@gmail.com" >> $WORKING/userlist
+echo "another@gmail.com" >> $WORKING/userlist
 
 
 # Build an environment file with OAuth info.
@@ -39,32 +37,27 @@ echo "OAUTH_CLIENT_SECRET=" >> $WORKING/env-file
 
 # Make a self-signed ssl certificate in ssl/.
 # Or you can put a real certificate and key in there.
-if ! [ -d "ssl" ]; then
-  mkdir $WORKING/ssl
+SSL=$WORKING/ssl
+if ! [ -d "$SSL" ]; then
+  mkdir $SSL
 
   openssl req -new -newkey rsa:2048 \
   -rand /dev/urandom -nodes \
-  -keyout $WORKING/ssl.key \
-  -out $WORKING/jupyter.csr \
+  -keyout $SSL/ssl.key \
+  -out $SSL/jupyter.csr \
   -subj "/C=US/ST=YourState/L=YourLocale/O=YourOrganization/OU=YourDepartment/CN=your.domain"
-  openssl x509 -req -days 365 -in $WORKING/jupyter.csr -signkey $WORKING/ssl.key -out $WORKING/ssl.crt
+  openssl x509 -req -days 365 -in $SSL/jupyter.csr -signkey $SSL/ssl.key -out $SSL/ssl.crt
 fi
 
-# Config to mount in Matlab.
-MATLAB_ROOT=/usr/local/MATLAB/R2016a
-MATLAB_LOGS=$WORKING
-MATLAB_MAC_ADDRESS="00:00:00:00:00:00"
 
 # Launch JupyterHub!
 # Server port must match the port above in OAUTH_CALLBACK_URL.  443 is default for HTTPS.
 # Mount this working folder into the container at /var/jupyter
 # Pass in the env-file with OAuth gonfig
+# Capture the log to the Docker host at jupyter.log
 PORT=443
 sudo docker run -p $PORT:$PORT \
- -v $MATLAB_ROOT:/usr/local/MATLAB/from-host \
- -v $MATLAB_LOGS:/var/log/matlab \
- -v $WORKING:/var/jupyter \
- --env-file=$WORKING/env-file \
- --mac-address=$MATLAB_MAC_ADDRESS \
- -t -i ninjaben/jupyter-hub-oauth-matlab --port $PORT
+  -v $WORKING:/var/jupyter \
+  --env-file=$WORKING/env-file \
+  -t -i ninjaben/jupyter-hub-oauth-matlab --port $PORT
 
