@@ -15,9 +15,6 @@
 #   https://github.com/jupyterhub/oauthenticator/tree/master/example
 #
 
-# TODO: invoke setToolboxPath at startup, so that notebooks don't have to see it.
-# see matlabroot/toolbox/local/matlabrc.m or startup.m
-
 FROM ninjaben/jupyter-hub-oauth
 
 MAINTAINER Ben Heasly <benjamin.heasly@gmail.com>
