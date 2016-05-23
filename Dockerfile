@@ -42,6 +42,9 @@ RUN pip install pyzmq \
 # wrapper to start mounted-in matlab, plus MATLABPATH=/usr/local/MATLAB/
 ADD matlab /usr/local/bin/matlab
 
+# shared temp folder where python-matlab bridge can write image files
+RUN mkdir -p /tmp/MatlabData/ && chmod 777 -R /tmp/MatlabData/
+
 # shared Matlab demo notebook
 ADD MatlabWelcome.ipynb /srv/ipython/examples/MatlabWelcome.ipynb
 
