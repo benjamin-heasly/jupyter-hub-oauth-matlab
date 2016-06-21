@@ -1,29 +1,29 @@
-function toolboxRoot = setToolboxPath(varargin)
+function toolboxRoot = tbSetToolboxPath(varargin)
 % Set up the Matlab path for the system's toolbox folder.
 %
-% The idea is to use this script at the top of a Jupyter Notebook, to set
-% up the path.  It expects toolboxes to have been installed (by an
-% administrator) in an agreed-upon folder.
+% The idea is to run this script whenever you make your Matlab path
+% consistent.  For example, this might be tue at the top of a Jupyter
+% notebook.  It expects toolboxes to have been installed by you or an
+% administrator in an agreed-upon folder, like
+% '/usr/local/MATLAB/toolboxes', '~/toolboxes', or similar.
 %
-% toolboxRoot = setToolboxPath() sets the Matlab path for the toolbox foler
-% and its subfolders and cleans up path cruft like hidden folders used by
-% Git and Svn.
+% toolboxRoot = tbSetToolboxPath() sets the Matlab path for the default
+% toolbox folder and its subfolders and cleans up path cruft like hidden
+% folders used by Git and Svn.
 %
-% setToolboxPath(... 'toolboxRoot', toolboxRoot) specifies a toolboxRoot
-% folder to set the path for.  The default is
-% '/usr/local/MATLAB/toolboxes/'.
+% tbSetToolboxPath(... 'toolboxRoot', toolboxRoot) specifies a toolboxRoot
+% folder to set the path for.  The default is '~/toolboxes/'.
 %
-% setToolboxPath(... 'restorePath', restorePath) specifies whether to
-% restore the default Matlab path before adding the toolbox path.  The
-% default is false, add to the existing path.
+% tbSetToolboxPath(... 'restorePath', restorePath) specifies whether to
+% restore the default Matlab path before setting up the toolbox path.  The
+% default is false, just append to the existing path.
 %
 % Returns the toolboxRoot from which the path was set.
 %
-% Copyright 2016 benjamin.heasly@gmail.com
-%
+% 2016 benjamin.heasly@gmail.com
 
 parser = inputParser();
-parser.addParameter('toolboxRoot', '/usr/local/MATLAB/toolboxes', @ischar);
+parser.addParameter('toolboxRoot', '~/toolboxes', @ischar);
 parser.addParameter('restorePath', false, @islogical);
 parser.parse(varargin{:});
 toolboxRoot = parser.Results.toolboxRoot;
