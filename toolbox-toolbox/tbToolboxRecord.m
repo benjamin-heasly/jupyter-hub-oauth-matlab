@@ -18,8 +18,8 @@ function record = tbToolboxRecord(varargin)
 %   url.
 %   - 'type' the type of repository that contains the toolbox, currently
 %   only 'git' is allowed
-%   - 'ref' optional branch/tag/commit to git checkout after clonging the
-%   toolbox
+%   - 'ref' optional branch/tag to git fetch and checkout after clonging
+%   the toolbox
 %
 % 2016 benjamin.heasly@gmail.com
 

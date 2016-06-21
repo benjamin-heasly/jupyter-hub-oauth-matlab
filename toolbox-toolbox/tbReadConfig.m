@@ -15,7 +15,7 @@ function [config, filePath] = tbReadConfig(varargin)
 % 2016 benjamin.heasly@gmail.com
 
 parser = inputParser();
-parser.addParameter('filePath', '~/toolbox-toolbox-config.json', @ischar);
+parser.addParameter('filePath', '~/toolbox-config.json', @ischar);
 parser.parse(varargin{:});
 filePath = parser.Results.filePath;
 

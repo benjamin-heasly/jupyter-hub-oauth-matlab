@@ -11,13 +11,13 @@ function filePath = tbWriteConfig(config, varargin)
 %
 % tbWriteConfig( ... 'filePath', filePath) specify where to
 % write the config file.  The default location is
-% '~/toolbox-toolbox-config.json'.
+% '~/toolbox-config.json'.
 %
 % 2016 benjamin.heasly@gmail.com
 
 parser = inputParser();
 parser.addRequired('config', @isstruct);
-parser.addParameter('filePath', '~/toolbox-toolbox-config.json', @ischar);
+parser.addParameter('filePath', '~/toolbox-config.json', @ischar);
 parser.parse(config, varargin{:});
 config = parser.Results.config;
 filePath = parser.Results.filePath;
