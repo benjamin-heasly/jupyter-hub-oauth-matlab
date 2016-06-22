@@ -34,7 +34,7 @@ RUN pip install pyzmq \
     && pip install jupyter \
     && pip install jupyter_client \
     && pip install matlab_kernel \
-    && python -m matlab_kernel.install
+    && python -m matlab_kernel install
 
 # wrapper to start mounted-in matlab, plus MATLABPATH=/usr/local/MATLAB/
 ADD matlab /usr/local/bin/matlab
@@ -45,10 +45,12 @@ RUN mkdir -p /tmp/MatlabData/ && chmod 777 -R /tmp/MatlabData/
 # shared Matlab demo notebook
 ADD MatlabWelcome.ipynb /srv/ipython/examples/MatlabWelcome.ipynb
 
-# standard place where other Docker images can add toolboxes
-RUN mkdir -p /usr/local/MATLAB/toolboxes
-ADD setToolboxPath.m /usr/local/MATLAB/setToolboxPath.m
+# update jupyter config file with some changes for matlab
+ADD jupyterhub_config.py /srv/oauthenticator/jupyterhub_config.py
 
-# add toolboxes to path at startup
+# get the "toolbox toolbox" which helps manage Matlab toolboxes
+ADD toolbox-toolbox/ /srv/toolbox-toolbox/
+
+# add toolboxes to Matlab path at startup
 ADD startup.m /usr/local/MATLAB/startup.m
 

@@ -23,8 +23,14 @@ parser.addRequired('config', @isstruct);
 parser.addParameter('toolboxRoot', '~/automatic-toolboxes', @ischar);
 parser.addParameter('restorePath', false, @islogical);
 parser.parse(config, varargin{:});
+config = parser.Results.config;
 toolboxRoot = parser.Results.toolboxRoot;
 restorePath = parser.Results.restorePath;
+
+if isempty(config) || ~isstruct(config) || ~isfield(config, 'name')
+    results = config;
+    return;
+end
 
 %% Obtain or update the toolboxes.
 results = tbFetchToolboxes(config, 'toolboxRoot', toolboxRoot);
@@ -39,6 +45,10 @@ end
 nToolboxes = numel(results);
 for tt = 1:nToolboxes
     record = config(tt);
+    if record.status ~= 0
+        continue;
+    end
+    
     toolboxPath = fullfile(toolboxRoot, record.name);
     tbSetToolboxPath('toolboxPath', toolboxPath, 'restorePath', false);
 end
