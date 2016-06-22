@@ -16,7 +16,7 @@ if 7 == exist(toolboxToolboxPath, 'dir')
 end
 
 %% Locate or create the user's toolbox config file.
-userConfigPath = '~/toolbox-config.json';
+userConfigPath = tbHomePathToAbsolute('~/toolbox-config.json');
 if 2 ~= exist(userConfigPath, 'file');
     % copy from standard, shared location
     standardConfigPath = '/srv/toolbox-toolbox/toolbox-config.json';

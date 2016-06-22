@@ -10,16 +10,16 @@ function results = tbFetchToolboxes(config, varargin)
 % folder.
 %
 % tbReadConfig( ... 'toolboxRoot', toolboxRoot) specify where to fetch
-% toolboxes.  The default location is '~/automatic-toolboxes'.
+% toolboxes.  The default location is '~/toolboxes'.
 %
 % 2016 benjamin.heasly@gmail.com
 
 parser = inputParser();
 parser.addRequired('config', @isstruct);
-parser.addParameter('toolboxRoot', '~/automatic-toolboxes', @ischar);
+parser.addParameter('toolboxRoot', '~/toolboxes', @ischar);
 parser.addParameter('restorePath', false, @islogical);
 parser.parse(config, varargin{:});
-toolboxRoot = parser.Results.toolboxRoot;
+toolboxRoot = tbHomePathToAbsolute(parser.Results.toolboxRoot);
 
 results = config;
 [results.command] = deal('');
@@ -64,7 +64,7 @@ for tt = 1:nToolboxes
         fprintf('Fetching toolbox "%s" into "%s"\n', record.name, toolboxFolder);
         
         % obtain the toolbox with git
-        cloneCommand = sprintf('git clone "%s" "%s"', record.url, toolboxFolder);
+        cloneCommand = sprintf('git -C "%s" clone "%s" "%s"', toolboxRoot, record.url, record.name);
         [cloneStatus, cloneResult] = system(cloneCommand);
         results(tt).status = cloneStatus;
         results(tt).command = cloneCommand;

@@ -26,7 +26,7 @@ parser = inputParser();
 parser.addParameter('toolboxPath', '~/toolboxes', @ischar);
 parser.addParameter('restorePath', false, @islogical);
 parser.parse(varargin{:});
-toolboxPath = parser.Results.toolboxPath;
+toolboxPath = tbHomePathToAbsolute(parser.Results.toolboxPath);
 restorePath = parser.Results.restorePath;
 
 %% Start fresh?

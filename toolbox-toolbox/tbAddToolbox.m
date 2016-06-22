@@ -24,17 +24,17 @@ function results = tbAddToolbox(varargin)
 % toolbox config file.  The default location is '~/toolbox-config.json'.
 %
 % tbReadConfig( ... 'toolboxRoot', toolboxRoot) specify where to fetch
-% toolboxes.  The default location is '~/automatic-toolboxes'.
+% toolboxes.  The default location is '~/toolboxes'.
 %
 % 2016 benjamin.heasly@gmail.com
 
 parser = inputParser();
 parser.KeepUnmatched = true;
 parser.addParameter('configPath', '~/toolbox-config.json', @ischar);
-parser.addParameter('toolboxRoot', '~/automatic-toolboxes', @ischar);
+parser.addParameter('toolboxRoot', '~/toolboxes', @ischar);
 parser.parse(varargin{:});
-configPath = parser.Results.configPath;
-toolboxRoot = parser.Results.toolboxRoot;
+configPath = tbHomePathToAbsolute(parser.Results.configPath);
+toolboxRoot = tbHomePathToAbsolute(parser.Results.toolboxRoot);
 
 %% Make a new toolbox record.
 newRecord = tbToolboxRecord(varargin{:});

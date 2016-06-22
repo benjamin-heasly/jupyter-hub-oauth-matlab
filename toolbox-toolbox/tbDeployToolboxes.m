@@ -20,11 +20,11 @@ function results = tbDeployToolboxes(config, varargin)
 
 parser = inputParser();
 parser.addRequired('config', @isstruct);
-parser.addParameter('toolboxRoot', '~/automatic-toolboxes', @ischar);
+parser.addParameter('toolboxRoot', '~/toolboxes', @ischar);
 parser.addParameter('restorePath', false, @islogical);
 parser.parse(config, varargin{:});
 config = parser.Results.config;
-toolboxRoot = parser.Results.toolboxRoot;
+toolboxRoot = tbHomePathToAbsolute(parser.Results.toolboxRoot);
 restorePath = parser.Results.restorePath;
 
 if isempty(config) || ~isstruct(config) || ~isfield(config, 'name')
@@ -44,7 +44,7 @@ end
 % and so we don't add extra cruft in the toolboxRoog folder
 nToolboxes = numel(results);
 for tt = 1:nToolboxes
-    record = config(tt);
+    record = results(tt);
     if record.status ~= 0
         continue;
     end
