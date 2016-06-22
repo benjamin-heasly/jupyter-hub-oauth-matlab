@@ -1,15 +1,15 @@
-function filePath = tbWriteConfig(config, varargin)
+function configPath = tbWriteConfig(config, varargin)
 % Write the given toolbox config struct to a file.
 %
 % The idea is to take the toolbox configuration struct we're working with
 % and write it to a file for later.  When we write, we massage the given
 % configuration into well-formed records.
 %
-% filePath = tbWriteConfig(config) write the given config struct to a file
+% configPath = tbWriteConfig(config) write the given config struct to a file
 % at the default location, and returns the full, absolute path to the
 % written file.
 %
-% tbWriteConfig( ... 'filePath', filePath) specify where to
+% tbWriteConfig( ... 'configPath', configPath) specify where to
 % write the config file.  The default location is
 % '~/toolbox-config.json'.
 %
@@ -17,10 +17,10 @@ function filePath = tbWriteConfig(config, varargin)
 
 parser = inputParser();
 parser.addRequired('config', @isstruct);
-parser.addParameter('filePath', '~/toolbox-config.json', @ischar);
+parser.addParameter('configPath', '~/toolbox-config.json', @ischar);
 parser.parse(config, varargin{:});
 config = parser.Results.config;
-filePath = parser.Results.filePath;
+configPath = parser.Results.configPath;
 
 %% Massage the given config into well-formed records.
 nToolboxes = numel(config);
@@ -35,4 +35,4 @@ end
 records = [wellFormedRecords{:}];
 
 %% Write out to disk.
-savejson('', records, filePath);
+savejson('', records, configPath);

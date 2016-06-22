@@ -14,7 +14,7 @@ classdef TbSanityTest < matlab.unittest.TestCase
     % 2016 benjamin.heasly@gmail.com
     
     properties
-        filePath = fullfile(tempdir(), 'toolbox-config.json');
+        configPath = fullfile(tempdir(), 'toolbox-config.json');
         toolboxRoot = fullfile(tempdir(), 'automatic-toolboxes');
         expectedFiles = struct( ...
             'simple', {{'master.txt'}}, ...
@@ -26,23 +26,83 @@ classdef TbSanityTest < matlab.unittest.TestCase
             'withBranch', {{'tag.txt'}}, ...
             'withTag', {{'branch.txt'}}, ...
             'withCommit', {{'master.txt', 'branch.txt', 'tag.txt'}});
+        originalMatlabPath;
+    end
+    
+    methods (TestMethodSetup)
+        function saveoriginalMatlabPath(obj)
+            obj.originalMatlabPath = path();
+        end
+        
+        function cleanUpTempFiles(obj)
+            if 2 == exist(obj.configPath, 'file')
+                delete(obj.configPath);
+            end
+            
+            if 7 == exist(obj.toolboxRoot, 'dir')
+                rmdir(obj.toolboxRoot, 's');
+            end
+        end
+    end
+    
+    methods (TestMethodTeardown)
+        function restoreoriginalMatlabPath(obj)
+            path(obj.originalMatlabPath);
+        end
     end
     
     methods (Test)
         function testLifecycle(obj)
             % declare toolbox configuration
             obj.createConfigFile();
-            config = tbReadConfig('filePath', obj.filePath);
+            config = tbReadConfig('configPath', obj.configPath);
             
-            % fetch toolboxes fresh
-            if 7 == exist(obj.toolboxRoot, 'dir')
-                rmdir(obj.toolboxRoot, 's');
-            end
-            results = tbFetchToolboxes(config, 'toolboxRoot', obj.toolboxRoot);
+            % fetch toolboxes fresh (see setup method)
+            results = tbDeployToolboxes(config, ...
+                'toolboxRoot', obj.toolboxRoot, ...
+                'restorePath', true);
             obj.sanityCheckResults(results);
             
             % fetch again should be sage
-            results = tbFetchToolboxes(config, 'toolboxRoot', obj.toolboxRoot);
+            results = tbDeployToolboxes(config, ...
+                'toolboxRoot', obj.toolboxRoot, ...
+                'restorePath', true);
+            obj.sanityCheckResults(results);
+        end
+        
+        function testAddOneAtATime(obj)
+            % from scratch
+            testRepoUrl = 'https://github.com/benjamin-heasly/sample-repo.git';
+            results = tbAddToolbox( ...
+                'toolboxRoot', obj.toolboxRoot, ...
+                'configPath', obj.configPath, ...
+                'name', 'simple', ...
+                'url', testRepoUrl);
+            obj.sanityCheckResults(results);
+            
+            results = tbAddToolbox( ...
+                'toolboxRoot', obj.toolboxRoot, ...
+                'configPath', obj.configPath, ...
+                'name', 'withBranch', ...
+                'url', testRepoUrl, ...
+                'ref', 'sampleBranch');
+            obj.sanityCheckResults(results);
+            
+            results = tbAddToolbox( ...
+                'toolboxRoot', obj.toolboxRoot, ...
+                'configPath', obj.configPath, ...
+                'name', 'withBranch', ...
+                'name', 'withTag', ...
+                'url', testRepoUrl, ...
+                'ref', 'sampleTag');
+            obj.sanityCheckResults(results);
+            
+            results = tbAddToolbox( ...
+                'toolboxRoot', obj.toolboxRoot, ...
+                'configPath', obj.configPath, ...
+                'name', 'withCommit', ...
+                'url', testRepoUrl, ...
+                'ref', 'c1c57d6290f601b98f3dc0d73b0c5a3522165e31');
             obj.sanityCheckResults(results);
         end
     end
@@ -56,7 +116,7 @@ classdef TbSanityTest < matlab.unittest.TestCase
                 tbToolboxRecord('name', 'withTag', 'url', testRepoUrl, 'ref', 'sampleTag'), ...
                 tbToolboxRecord('name', 'withCommit', 'url', testRepoUrl, 'ref', 'c1c57d6290f601b98f3dc0d73b0c5a3522165e31'), ...
                 ];
-            tbWriteConfig(config, 'filePath', obj.filePath);
+            tbWriteConfig(config, 'configPath', obj.configPath);
         end
         
         function sanityCheckResults(obj, results)
@@ -69,7 +129,7 @@ classdef TbSanityTest < matlab.unittest.TestCase
                 obj.assertEqual(result.status, 0, ...
                     sprintf('command "%s" -> result "%s"', result.command, result.result));
                 
-                % expected files presenet?
+                % expected files present?
                 expected = obj.expectedFiles.(result.name);
                 for ff = 1:numel(expected)
                     expectedFile = expected{ff};
@@ -77,6 +137,16 @@ classdef TbSanityTest < matlab.unittest.TestCase
                     obj.assertEqual(exist(expectedPath, 'file'), 2, ...
                         sprintf('For toolbox "%s", expected file "%s" not found.', ...
                         result.name, expectedPath));
+                end
+                
+                % expected files on Matlab path?
+                expected = obj.expectedFiles.(result.name);
+                for ff = 1:numel(expected)
+                    expectedFile = expected{ff};
+                    whichFile = which(expectedFile);
+                    obj.assertNotEmpty(whichFile, ...
+                        sprintf('For toolbox "%s", expected file "%s" not on the Matlab path.', ...
+                        result.name, expectedFile));
                 end
                 
                 % unexpected files not presenet?

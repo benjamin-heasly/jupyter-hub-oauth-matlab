@@ -1,32 +1,32 @@
-function toolboxRoot = tbSetToolboxPath(varargin)
+function toolboxPath = tbSetToolboxPath(varargin)
 % Set up the Matlab path for the system's toolbox folder.
 %
-% The idea is to run this script whenever you make your Matlab path
-% consistent.  For example, this might be tue at the top of a Jupyter
-% notebook.  It expects toolboxes to have been installed by you or an
-% administrator in an agreed-upon folder, like
+% The idea is to run this script whenever you need to bring your Matlab
+% path to a known state.  For example, this might be tue at the top of a
+% Jupyter notebook or automated test suite.  It expects toolboxes to have
+% been installed by you or an administrator in an agreed-upon folder, like
 % '/usr/local/MATLAB/toolboxes', '~/toolboxes', or similar.
 %
-% toolboxRoot = tbSetToolboxPath() sets the Matlab path for the default
+% toolboxPath = tbSetToolboxPath() sets the Matlab path for the default
 % toolbox folder and its subfolders and cleans up path cruft like hidden
 % folders used by Git and Svn.
 %
-% tbSetToolboxPath(... 'toolboxRoot', toolboxRoot) specifies a toolboxRoot
-% folder to set the path for.  The default is '~/toolboxes/'.
+% tbSetToolboxPath(... 'toolboxPath', toolboxPath) specifies the
+% toolboxPath folder to set the path for.  The default is '~/toolboxes/'.
 %
 % tbSetToolboxPath(... 'restorePath', restorePath) specifies whether to
 % restore the default Matlab path before setting up the toolbox path.  The
 % default is false, just append to the existing path.
 %
-% Returns the toolboxRoot from which the path was set.
+% Returns the toolboxPath from which the path was set.
 %
 % 2016 benjamin.heasly@gmail.com
 
 parser = inputParser();
-parser.addParameter('toolboxRoot', '~/toolboxes', @ischar);
+parser.addParameter('toolboxPath', '~/toolboxes', @ischar);
 parser.addParameter('restorePath', false, @islogical);
 parser.parse(varargin{:});
-toolboxRoot = parser.Results.toolboxRoot;
+toolboxPath = parser.Results.toolboxPath;
 restorePath = parser.Results.restorePath;
 
 %% Start fresh?
@@ -35,10 +35,10 @@ if restorePath
     restoredefaultpath();
 end
 
-fprintf('Adding toolbox paths:\n%s\n', ls(toolboxRoot));
+fprintf('Adding toolbox path "%s"\n', toolboxPath);
 
 %% Compute a new path.
-toolboxPath = genpath(toolboxRoot);
+toolboxPath = genpath(toolboxPath);
 
 %% Clean up the path.
 scanResults = textscan(toolboxPath, '%s', 'delimiter', pathsep());

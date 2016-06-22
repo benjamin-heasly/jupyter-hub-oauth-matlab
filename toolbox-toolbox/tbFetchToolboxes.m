@@ -17,6 +17,7 @@ function results = tbFetchToolboxes(config, varargin)
 parser = inputParser();
 parser.addRequired('config', @isstruct);
 parser.addParameter('toolboxRoot', '~/automatic-toolboxes', @ischar);
+parser.addParameter('restorePath', false, @islogical);
 parser.parse(config, varargin{:});
 toolboxRoot = parser.Results.toolboxRoot;
 
@@ -43,7 +44,7 @@ for tt = 1:nToolboxes
     
     toolboxFolder = fullfile(toolboxRoot, record.name);
     if 7 == exist(toolboxFolder, 'dir')
-        fprintf('Updating toolbox "%s" at "%s\n', record.name, toolboxFolder);
+        fprintf('Updating toolbox "%s" at "%s"\n', record.name, toolboxFolder);
         
         % update the toolbox with git
         if isempty(record.ref)
@@ -60,7 +61,7 @@ for tt = 1:nToolboxes
         end
         
     else
-        fprintf('Fetching toolbox "%s" into "%s\n', record.name, toolboxFolder);
+        fprintf('Fetching toolbox "%s" into "%s"\n', record.name, toolboxFolder);
         
         % obtain the toolbox with git
         cloneCommand = sprintf('git clone "%s" "%s"', record.url, toolboxFolder);

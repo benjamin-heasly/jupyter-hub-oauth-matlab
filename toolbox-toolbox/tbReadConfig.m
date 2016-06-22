@@ -1,32 +1,32 @@
-function [config, filePath] = tbReadConfig(varargin)
+function [config, configPath] = tbReadConfig(varargin)
 % Read toolbox configuration from a file.
 %
 % The idea is to locate a toolbox configuration file on disk, and load it
 % into Matlab so we can work with it.  When we read, we massage the
 % configuration into well-formed records.
 %
-% [config, filePath] = tbReadConfig() reads a config struct from file at
+% [config, configPath] = tbReadConfig() reads a config struct from file at
 % the default location.  Returns the config struct as well as the full,
 % absolute path to the file that was read.
 %
-% tbReadConfig( ... 'filePath', filePath) specify where to look for the
-% config file.  The default location is '~/toolbox-toolbox-config.json'.
+% tbReadConfig( ... 'configPath', configPath) specify where to look for the
+% config file.  The default location is '~/toolbox-config.json'.
 %
 % 2016 benjamin.heasly@gmail.com
 
 parser = inputParser();
-parser.addParameter('filePath', '~/toolbox-config.json', @ischar);
+parser.addParameter('configPath', '~/toolbox-config.json', @ischar);
 parser.parse(varargin{:});
-filePath = parser.Results.filePath;
+configPath = parser.Results.configPath;
 
 config = struct();
 
 %% Read from disk.
-if 2 ~= exist(filePath, 'file')
+if 2 ~= exist(configPath, 'file')
     return;
 end
 
-rawConfig = loadjson(filePath);
+rawConfig = loadjson(configPath);
 if ~isstruct(rawConfig) && ~iscell(rawConfig)
     return;
 end
