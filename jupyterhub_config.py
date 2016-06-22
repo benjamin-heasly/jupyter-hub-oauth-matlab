@@ -10,7 +10,7 @@ c.JupyterHub.ssl_cert = '/srv/oauthenticator/ssl/ssl.crt'
 c.JupyterHub.log_level = 'DEBUG'
 
 # Shared notebooks
-c.Spawner.notebook_dir = '~/automatic-toolboxes'
+c.Spawner.notebook_dir = '~'
 c.Spawner.args = ['--NotebookApp.default_url=/notebooks']
 
 # OAuth and user configuration
