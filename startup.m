@@ -23,7 +23,9 @@ userConfigPath = tbHomePathToAbsolute('~/toolbox-config.json');
 if 2 ~= exist(userConfigPath, 'file');
     % copy from standard, shared location
     standardConfigPath = '/srv/toolbox-toolbox/toolbox-config.json';
-    copyfile(standardConfigPath, userConfigPath);
+    if 2 == exist(standardConfigPath, 'file');
+        copyfile(standardConfigPath, userConfigPath);
+    end
 end
 
 %% Load the config and deploy the toolboxes that were caled for.
