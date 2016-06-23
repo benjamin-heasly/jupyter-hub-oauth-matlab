@@ -26,15 +26,25 @@ function results = tbAddToolbox(varargin)
 % tbReadConfig( ... 'toolboxRoot', toolboxRoot) specify where to fetch
 % toolboxes.  The default location is '~/toolboxes'.
 %
+% As an optimization for shares systems, toolboxes may be pre-deployed
+% (probably by an admin) to a common toolbox root folder.  Toolboxes found
+% here will be updated, instead adding new ones to the given toolboxRoot.
+%
+% tbFetchToolboxes( ... 'toolboxCommonRoot', toolboxCommonRoot) specify
+% where to look for shared toolboxes.  The default location is
+% '/srv/toolboxes'.
+%
 % 2016 benjamin.heasly@gmail.com
 
 parser = inputParser();
 parser.KeepUnmatched = true;
 parser.addParameter('configPath', '~/toolbox-config.json', @ischar);
 parser.addParameter('toolboxRoot', '~/toolboxes', @ischar);
+parser.addParameter('toolboxCommonRoot', '/srv/toolboxes', @ischar);
 parser.parse(varargin{:});
 configPath = tbHomePathToAbsolute(parser.Results.configPath);
 toolboxRoot = tbHomePathToAbsolute(parser.Results.toolboxRoot);
+toolboxCommonRoot = tbHomePathToAbsolute(parser.Results.toolboxCommonRoot);
 
 %% Make a new toolbox record.
 newRecord = tbToolboxRecord(varargin{:});
@@ -42,6 +52,7 @@ newRecord = tbToolboxRecord(varargin{:});
 %% Deploy just the new toolbox.
 results = tbDeployToolboxes(newRecord, ...
     'toolboxRoot', toolboxRoot, ...
+    'toolboxCommonRoot', toolboxCommonRoot, ...
     'restorePath', false);
 
 if 0 ~= results.status

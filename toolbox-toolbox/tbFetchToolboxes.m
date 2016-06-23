@@ -2,24 +2,35 @@ function results = tbFetchToolboxes(config, varargin)
 % Read toolbox configuration from a file.
 %
 % The idea is to work through elements of the given toolbox configuration
-% struct, and for each element fetch or update the toolbox.
+% struct, and for each element fetch or update the indicated toolbox.
 %
 % results = tbFetchToolboxes(config) fetches or updates each of the
 % toolboxes named in the given config struct (see tbReadConfig).  Each
 % toolbox will be located in a subfolder of the default toolbox root
 % folder.
 %
-% tbReadConfig( ... 'toolboxRoot', toolboxRoot) specify where to fetch
+% tbFetchToolboxes( ... 'toolboxRoot', toolboxRoot) specify where to fetch
 % toolboxes.  The default location is '~/toolboxes'.
+%
+% As an optimization for shares systems, toolboxes may be pre-deployed
+% (probably by an admin) to a common toolbox root folder.  Toolboxes found
+% here will be updated, instead of being installed to the given
+% toolboxRoot.
+%
+% tbFetchToolboxes( ... 'toolboxCommonRoot', toolboxCommonRoot) specify
+% where to look for shared toolboxes.  The default location is
+% '/srv/toolboxes'.
 %
 % 2016 benjamin.heasly@gmail.com
 
 parser = inputParser();
 parser.addRequired('config', @isstruct);
 parser.addParameter('toolboxRoot', '~/toolboxes', @ischar);
+parser.addParameter('toolboxCommonRoot', '/srv/toolboxes', @ischar);
 parser.addParameter('restorePath', false, @islogical);
 parser.parse(config, varargin{:});
 toolboxRoot = tbHomePathToAbsolute(parser.Results.toolboxRoot);
+toolboxCommonRoot = tbHomePathToAbsolute(parser.Results.toolboxCommonRoot);
 
 results = config;
 [results.command] = deal('');
@@ -42,57 +53,67 @@ for tt = 1:nToolboxes
         continue;
     end
     
+    toolboxCommonFolder = fullfile(toolboxCommonRoot, record.name);
     toolboxFolder = fullfile(toolboxRoot, record.name);
-    if 7 == exist(toolboxFolder, 'dir')
-        fprintf('Updating toolbox "%s" at "%s"\n', record.name, toolboxFolder);
+    if 7 == exist(toolboxCommonFolder, 'dir')
+        fprintf('Updating shared toolbox "%s" at "%s"\n', record.name, toolboxCommonFolder);
+        results(tt) = updateToolbox(record, toolboxCommonFolder);
         
-        % update the toolbox with git
-        if isempty(record.ref)
-            pullCommand = sprintf('git -C "%s" pull', toolboxFolder);
-        else
-            pullCommand = sprintf('git -C "%s" pull origin %s', toolboxFolder, record.ref);
-        end
-        [pullStatus, pullResult] = system(pullCommand);
-        results(tt).status = pullStatus;
-        results(tt).command = pullCommand;
-        results(tt).result = pullResult;
-        if 0 ~= pullStatus
-            continue;
-        end
+    elseif 7 == exist(toolboxFolder, 'dir')
+        fprintf('Updating toolbox "%s" at "%s"\n', record.name, toolboxFolder);
+        results(tt) = updateToolbox(record, toolboxFolder);
         
     else
         fprintf('Fetching toolbox "%s" into "%s"\n', record.name, toolboxFolder);
-        
-        % obtain the toolbox with git
-        cloneCommand = sprintf('git -C "%s" clone "%s" "%s"', toolboxRoot, record.url, record.name);
-        [cloneStatus, cloneResult] = system(cloneCommand);
-        results(tt).status = cloneStatus;
-        results(tt).command = cloneCommand;
-        results(tt).result = cloneResult;
-        if 0 ~= cloneStatus
-            continue;
-        end
-        
-        % switch to optional git branch or tag
-        if ~isempty(record.ref)
-            fetchCommand = sprintf('git -C "%s" fetch origin +%s:%s', toolboxFolder, record.ref, record.ref);
-            [fetchStatus, fetchResult] = system(fetchCommand);
-            results(tt).status = fetchStatus;
-            results(tt).command = fetchCommand;
-            results(tt).result = fetchResult;
-            if 0 ~= fetchStatus
-                continue;
-            end
-            
-            checkoutCommand = sprintf('git -C "%s" checkout %s', toolboxFolder, record.ref);
-            [checkoutStatus, checkoutResult] = system(checkoutCommand);
-            results(tt).status = checkoutStatus;
-            results(tt).command = checkoutCommand;
-            results(tt).result = checkoutResult;
-            if 0 ~= checkoutStatus
-                continue;
-            end
-        end
+        results(tt) = obtainToolbox(record, toolboxRoot, toolboxFolder);
     end
 end
 
+%% Obtain a toolbox that that was not yet deployed.
+function result = obtainToolbox(record, toolboxRoot, toolboxFolder)
+result = record;
+
+% clone
+cloneCommand = sprintf('git -C "%s" clone "%s" "%s"', toolboxRoot, record.url, record.name);
+[cloneStatus, cloneResult] = system(cloneCommand);
+result.command = cloneCommand;
+result.status = cloneStatus;
+result.result = cloneResult;
+if 0 ~= cloneStatus
+    return;
+end
+
+if ~isempty(record.ref)
+    fetchCommand = sprintf('git -C "%s" fetch origin +%s:%s', toolboxFolder, record.ref, record.ref);
+    [fetchStatus, fetchResult] = system(fetchCommand);
+    result.command = fetchCommand;
+    result.status = fetchStatus;
+    result.result = fetchResult;
+    if 0 ~= fetchStatus
+        return;
+    end
+    
+    checkoutCommand = sprintf('git -C "%s" checkout %s', toolboxFolder, record.ref);
+    [checkoutStatus, checkoutResult] = system(checkoutCommand);
+    result.command = checkoutCommand;
+    result.status = checkoutStatus;
+    result.result = checkoutResult;
+    if 0 ~= checkoutStatus
+        return;
+    end
+end
+
+%% Update a toolbox that was already deployed.
+function result = updateToolbox(record, toolboxFolder)
+% update the toolbox with git
+if isempty(record.ref)
+    command = sprintf('git -C "%s" pull', toolboxFolder);
+else
+    command = sprintf('git -C "%s" pull origin %s', toolboxFolder, record.ref);
+end
+[status, commandResult] = system(command);
+
+result = record;
+result.command = command;
+result.status = status;
+result.result = commandResult;

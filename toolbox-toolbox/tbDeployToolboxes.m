@@ -16,15 +16,26 @@ function results = tbDeployToolboxes(config, varargin)
 % restore the default Matlab path before setting up the toolbox path.  The
 % default is false, just append to the existing path.
 %
+% As an optimization for shares systems, toolboxes may be pre-deployed
+% (probably by an admin) to a common toolbox root folder.  Toolboxes found
+% here will be added to the path instead of toolboxes in the given
+% toolboxRoot.
+%
+% tbFetchToolboxes( ... 'toolboxCommonRoot', toolboxCommonRoot) specify
+% where to look for shared toolboxes.  The default location is
+% '/srv/toolboxes'.
+%
 % 2016 benjamin.heasly@gmail.com
 
 parser = inputParser();
 parser.addRequired('config', @isstruct);
 parser.addParameter('toolboxRoot', '~/toolboxes', @ischar);
+parser.addParameter('toolboxCommonRoot', '/srv/toolboxes', @ischar);
 parser.addParameter('restorePath', false, @islogical);
 parser.parse(config, varargin{:});
 config = parser.Results.config;
 toolboxRoot = tbHomePathToAbsolute(parser.Results.toolboxRoot);
+toolboxCommonRoot = tbHomePathToAbsolute(parser.Results.toolboxCommonRoot);
 restorePath = parser.Results.restorePath;
 
 if isempty(config) || ~isstruct(config) || ~isfield(config, 'name')
@@ -33,7 +44,9 @@ if isempty(config) || ~isstruct(config) || ~isfield(config, 'name')
 end
 
 %% Obtain or update the toolboxes.
-results = tbFetchToolboxes(config, 'toolboxRoot', toolboxRoot);
+results = tbFetchToolboxes(config, ...
+    'toolboxRoot', toolboxRoot, ...
+    'toolboxCommonRoot', toolboxCommonRoot);
 
 %% Add each toolbox to the path.
 if restorePath
@@ -41,7 +54,7 @@ if restorePath
 end
 
 % add toolboxes one at a time so that we can check for errors
-% and so we don't add extra cruft in the toolboxRoog folder
+% and so we don't add extra cruft that might be in the toolboxRoog folder
 nToolboxes = numel(results);
 for tt = 1:nToolboxes
     record = results(tt);
@@ -49,7 +62,12 @@ for tt = 1:nToolboxes
         continue;
     end
     
+    toolboxSharedPath = fullfile(toolboxCommonRoot, record.name);
     toolboxPath = fullfile(toolboxRoot, record.name);
-    tbSetToolboxPath('toolboxPath', toolboxPath, 'restorePath', false);
+    if 7 == exist(toolboxCommonRoot, 'dir')
+        tbSetToolboxPath('toolboxPath', toolboxSharedPath, 'restorePath', false);
+    elseif 7 == exist(toolboxPath, 'dir')
+        tbSetToolboxPath('toolboxPath', toolboxPath, 'restorePath', false);
+    end
 end
 

@@ -27,11 +27,15 @@ classdef TbSanityTest < matlab.unittest.TestCase
             'withTag', {{'branch.txt'}}, ...
             'withCommit', {{'master.txt', 'branch.txt', 'tag.txt'}});
         originalMatlabPath;
+        originalMatlabPwd;
     end
     
     methods (TestMethodSetup)
-        function saveoriginalMatlabPath(obj)
+        function saveOriginalMatlabState(obj)
             obj.originalMatlabPath = path();
+
+            obj.originalMatlabPwd = pwd();
+            cd(fileparts(which('TbSanityTest')));
         end
         
         function cleanUpTempFiles(obj)
@@ -46,7 +50,8 @@ classdef TbSanityTest < matlab.unittest.TestCase
     end
     
     methods (TestMethodTeardown)
-        function restoreoriginalMatlabPath(obj)
+        function restoreOriginalMatlabState(obj)
+            cd(obj.originalMatlabPwd);
             path(obj.originalMatlabPath);
         end
     end
