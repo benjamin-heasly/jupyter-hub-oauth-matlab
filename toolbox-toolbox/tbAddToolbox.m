@@ -32,7 +32,7 @@ function results = tbAddToolbox(varargin)
 %
 % tbFetchToolboxes( ... 'toolboxCommonRoot', toolboxCommonRoot) specify
 % where to look for shared toolboxes.  The default location is
-% '/srv/toolboxes'.
+% '/srv/toolbox-toolbox/toolboxes'.
 %
 % 2016 benjamin.heasly@gmail.com
 
@@ -40,7 +40,7 @@ parser = inputParser();
 parser.KeepUnmatched = true;
 parser.addParameter('configPath', '~/toolbox-config.json', @ischar);
 parser.addParameter('toolboxRoot', '~/toolboxes', @ischar);
-parser.addParameter('toolboxCommonRoot', '/srv/toolboxes', @ischar);
+parser.addParameter('toolboxCommonRoot', '/srv/toolbox-toolbox/toolboxes', @ischar);
 parser.parse(varargin{:});
 configPath = tbHomePathToAbsolute(parser.Results.configPath);
 toolboxRoot = tbHomePathToAbsolute(parser.Results.toolboxRoot);
