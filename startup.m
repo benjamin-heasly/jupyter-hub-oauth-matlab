@@ -9,10 +9,13 @@
 %
 % 2016 benjamin.heasly@gmail.com
 
+%% Start with default path to prevent funky behavior.
+restoredefaultpath();
+
 %% Add the toolbox-toolbox to the path.
-toolboxToolboxPath = '/srv/toolbox-toolbox/';
-if 7 == exist(toolboxToolboxPath, 'dir')
-    addpath(genpath(toolboxToolboxPath));
+toolboxToolboxSharedPath = '/srv/toolbox-toolbox/';
+if 7 == exist(toolboxToolboxSharedPath, 'dir')
+    addpath(genpath(toolboxToolboxSharedPath));
 end
 
 %% Locate or create the user's toolbox config file.

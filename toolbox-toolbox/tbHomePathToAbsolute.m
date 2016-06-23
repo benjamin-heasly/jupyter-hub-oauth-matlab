@@ -19,6 +19,6 @@ end
 
 if '~' == homePath(1)
     % ask system for the value of ~
-    homeBase = system('pwd ~');
-    absolutePath = [homeBase homePath(2:end)];
+    home = getenv('HOME');
+    absolutePath = [home homePath(2:end)];
 end
