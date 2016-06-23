@@ -27,5 +27,5 @@ if 2 ~= exist(userConfigPath, 'file');
 end
 
 %% Load the config and deploy the toolboxes that were caled for.
-config = tbReadConfig(userConfigPath);
+config = tbReadConfig('configPath', userConfigPath);
 tbDeployToolboxes(config);
