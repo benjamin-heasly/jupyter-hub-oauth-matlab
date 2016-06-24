@@ -39,8 +39,17 @@ RUN pip install pyzmq \
 # wrapper to start mounted-in matlab, plus MATLABPATH=/usr/local/MATLAB/
 ADD matlab /usr/local/bin/matlab
 
-# shared temp folder where python-matlab bridge can write image files
-RUN mkdir -p /tmp/MatlabData/ && chmod 777 -R /tmp/MatlabData/
+# shared temp folder where jupyter users (via python-matlab bridge) will read and write image files
+RUN mkdir /tmp/MatlabData
+
+# hack alert! explicitly create files that jupyter users (via python-matlab bridge) may overwrite
+#  would prefer to use file system acl on /tmp/MatlabData, but don't want to mess with fstab
+#  or would prefer to use g+rws on /tmp/MatlabData, but can't get jupyterhub to set umask 002 for users
+#  so for now, just create explicitly and explicitly open permissions to jupyter group
+#  an even better solution would be to use user-specific temp folders and/or UUID file names
+RUN for n in $(seq -f "%03g" 0 100); do touch /tmp/MatlabData/MatlabFig$n.png; done;
+RUN chown -R root:jupyter /tmp/MatlabData \
+    && chmod -R 775 /tmp/MatlabData
 
 # shared Matlab demo notebook
 ADD MatlabWelcome.ipynb /srv/ipython/examples/MatlabWelcome.ipynb
