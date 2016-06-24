@@ -64,7 +64,7 @@ for tt = 1:nToolboxes
     
     toolboxSharedPath = fullfile(toolboxCommonRoot, record.name);
     toolboxPath = fullfile(toolboxRoot, record.name);
-    if 7 == exist(toolboxCommonRoot, 'dir')
+    if 7 == exist(toolboxSharedPath, 'dir')
         tbSetToolboxPath('toolboxPath', toolboxSharedPath, 'restorePath', false);
     elseif 7 == exist(toolboxPath, 'dir')
         tbSetToolboxPath('toolboxPath', toolboxPath, 'restorePath', false);
