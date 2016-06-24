@@ -20,9 +20,16 @@ from subprocess import call
 class MySpawner(LocalProcessSpawner):
     @gen.coroutine
     def start(self):
-        dircmd = ['mkdir', '-p', '/home/' + self.user.name + '/' + self.notebook_dir]
-        print(dircmd)
-        call(dircmd)
+        # create the notebook director in the users's home
+        user_notebook_dir = '/home/' + self.user.name + '/' + self.notebook_dir
+        call(['mkdir', '-p', user_notebook_dir])
+        call(['chown', 'root:jupyter', user_notebook_dir])
+        call(['chmod', '775', user_notebook_dir])
+
+        # start matlab so that startup.m can fetch notebooks
+        call(['matlab', '-nosplash', '-nodesktop', '-r', 'exit'])
+
+        # proceed with normal startup
         LocalProcessSpawner.start(self)
         
 c.JupyterHub.spawner_class = MySpawner
