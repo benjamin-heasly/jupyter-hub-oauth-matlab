@@ -10,8 +10,22 @@ c.JupyterHub.ssl_cert = '/srv/oauthenticator/ssl/ssl.crt'
 c.JupyterHub.log_level = 'DEBUG'
 
 # Shared notebooks
-c.Spawner.notebook_dir = '~'
+c.Spawner.notebook_dir = 'toolboxes/notebooks'
 c.Spawner.args = ['--NotebookApp.default_url=/notebooks']
+
+from jupyterhub.spawner import LocalProcessSpawner
+from tornado import gen
+from subprocess import call
+
+class MySpawner(LocalProcessSpawner):
+    @gen.coroutine
+    def start(self):
+        dircmd = ['mkdir', '-p', '/home/' + self.user.name + '/' + self.notebook_dir]
+        print(dircmd)
+        call(dircmd)
+        LocalProcessSpawner.start(self)
+        
+c.JupyterHub.spawner_class = MySpawner
 
 # OAuth and user configuration
 c.JupyterHub.authenticator_class = 'oauthenticator.LocalGoogleOAuthenticator'
