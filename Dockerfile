@@ -63,3 +63,6 @@ ADD toolbox-toolbox/ /srv/toolbox-toolbox/
 # add toolboxes to Matlab path at startup
 ADD startup.m /usr/local/MATLAB/startup.m
 
+# wrapper to create user notebook dir and fetch notebooks launching user's jupyter server
+ADD matlab-setup-jupyterhub-singleuser /srv/matlab-setup-jupyterhub-singleuser
+

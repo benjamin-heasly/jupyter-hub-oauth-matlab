@@ -1,0 +1,13 @@
+#! /bin/bash
+# Wrapper around jupyterhub-singleuser startup scrupt
+
+# create user's own notebook dir
+#  as expected in jupyterhub_config.py    
+mkdir -p ~/toolboxes/notebooks
+
+# cycle Matlab so that startup.m can fetch notebooks
+matlab -nosplash -nodesktop -r "exit;"
+
+# proceed as normal
+jupyterhub-singleuser "$@"
+
