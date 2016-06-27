@@ -1,13 +1,18 @@
 #! /bin/bash
 # Wrapper around jupyterhub-singleuser startup script to let us do some initial Matlab setup
 
-# get the standard toobloxes for our Matlab sessions
+# get the standard tooblox config for our Matlab sessions
 if [ ! -e ~/toolbox-config.json ]
- then cp /srv/toolbox-toolbox/toolbox-config.json ~/toolbox-config.json
+  then cp /srv/toolbox-toolbox/toolbox-config.json ~/toolbox-config.json
 fi
 
-# fetch the notebook repo/toolbox with the Matlab toolbox-toolbox
-matlab -nosplash -nodesktop -r "tbDeployToolboxes('configPath', '~/toolbox-config.json', 'name', 'notebooks'),exit;"
+# use Matlab and Toolbox Toolbox to obtain or update our notebook repository
+# also revert any local edits to the official notebooks
+# untracked notebooks should survive
+if [ -e ~/toolboxes/notebooks/.git ]
+  then git -C ~/toolboxes/notebooks reset --hard
+fi
+matlab -nosplash -nodesktop -r "tbDeployToolboxes('configPath', '~/toolbox-config.json', 'name', 'notebooks');exit;"
 
 # if needed create user's own notebook dir
 #  as expected in jupyterhub_config.py    
