@@ -32,7 +32,7 @@ restorePath = parser.Results.restorePath;
 %% Start fresh?
 if restorePath
     fprintf('Restoring Matlab default path.\n');
-    restoredefaultpath();
+    tbResetMatlabPath();
 end
 
 fprintf('Adding toolbox path "%s"\n', toolboxPath);

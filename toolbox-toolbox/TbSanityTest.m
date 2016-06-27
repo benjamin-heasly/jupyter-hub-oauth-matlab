@@ -33,6 +33,7 @@ classdef TbSanityTest < matlab.unittest.TestCase
     methods (TestMethodSetup)
         function saveOriginalMatlabState(obj)
             obj.originalMatlabPath = path();
+            tbResetMatlabPath();
             
             obj.originalMatlabPwd = pwd();
             cd(fileparts(which('TbSanityTest')));

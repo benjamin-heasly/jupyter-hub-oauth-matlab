@@ -78,7 +78,7 @@ results = tbFetchToolboxes(config, ...
 
 %% Add each toolbox to the path.
 if restorePath
-    restoredefaultpath();
+    tbResetMatlabPath();
 end
 
 % add toolboxes one at a time so that we can check for errors
