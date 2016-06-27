@@ -33,7 +33,7 @@ classdef TbSanityTest < matlab.unittest.TestCase
     methods (TestMethodSetup)
         function saveOriginalMatlabState(obj)
             obj.originalMatlabPath = path();
-
+            
             obj.originalMatlabPwd = pwd();
             cd(fileparts(which('TbSanityTest')));
         end
@@ -63,13 +63,15 @@ classdef TbSanityTest < matlab.unittest.TestCase
             config = tbReadConfig('configPath', obj.configPath);
             
             % fetch toolboxes fresh (see setup method)
-            results = tbDeployToolboxes(config, ...
+            results = tbDeployToolboxes( ...
+                'config', config, ...
                 'toolboxRoot', obj.toolboxRoot, ...
                 'restorePath', true);
             obj.sanityCheckResults(results);
             
             % fetch again should be sage
-            results = tbDeployToolboxes(config, ...
+            results = tbDeployToolboxes(...
+                'config', config, ...
                 'toolboxRoot', obj.toolboxRoot, ...
                 'restorePath', true);
             obj.sanityCheckResults(results);

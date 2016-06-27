@@ -1,13 +1,19 @@
-function results = tbDeployToolboxes(config, varargin)
+function results = tbDeployToolboxes(varargin)
 % Fetch toolboxes and add them to the Matlab path.
 %
 % The goal here is to make it a one-liner to fetch toolboxes and add them
 % to the Matlab path.  This should automate several steps that we usually
 % do by hand, which is good for consistency and convenience.
 %
-% results = tbDeployToolboxes(config) fetches each toolbox in the given
-% config struct and adds it to the Matlab path.  Returns a struct of
+% results = tbDeployToolboxes() fetches each toolbox from the default
+% toolbox configuration adds each to the Matlab path.  Returns a struct of
 % results about what happened for each toolbox.
+%
+% tbReadConfig( ... 'configPath', configPath) specify where to look for the
+% config file.  The default location is '~/toolbox-config.json'.
+%
+% tbReadConfig( ... 'config', config) specify an explicit config struct to
+% use instead of reading config from file.
 %
 % tbDeployToolboxes(... 'toolboxRoot', toolboxRoot) specifies the
 % toolboxRoot folder to set the path for.  The default is '~/toolboxes/'.
@@ -15,6 +21,9 @@ function results = tbDeployToolboxes(config, varargin)
 % tbDeployToolboxes(... 'restorePath', restorePath) specifies whether to
 % restore the default Matlab path before setting up the toolbox path.  The
 % default is false, just append to the existing path.
+%
+% tbDeployToolboxes(... 'name', name) specify the name of a single toolbox
+% to deploy if found.  Other toolboxes will be ignored.
 %
 % As an optimization for shares systems, toolboxes may be pre-deployed
 % (probably by an admin) to a common toolbox root folder.  Toolboxes found
@@ -28,19 +37,38 @@ function results = tbDeployToolboxes(config, varargin)
 % 2016 benjamin.heasly@gmail.com
 
 parser = inputParser();
-parser.addRequired('config', @isstruct);
+parser.addParameter('configPath', '~/toolbox-config.json', @ischar);
+parser.addParameter('config', [], @(c) isempty(c) || isstruct(c));
 parser.addParameter('toolboxRoot', '~/toolboxes', @ischar);
 parser.addParameter('toolboxCommonRoot', '/srv/toolbox-toolbox/toolboxes', @ischar);
 parser.addParameter('restorePath', false, @islogical);
-parser.parse(config, varargin{:});
+parser.addParameter('name', '', @ischar);
+parser.parse(varargin{:});
+configPath = parser.Results.configPath;
 config = parser.Results.config;
 toolboxRoot = tbHomePathToAbsolute(parser.Results.toolboxRoot);
 toolboxCommonRoot = tbHomePathToAbsolute(parser.Results.toolboxCommonRoot);
 restorePath = parser.Results.restorePath;
+name = parser.Results.name;
 
+%% Choose explicit config, or load from file.
 if isempty(config) || ~isstruct(config) || ~isfield(config, 'name')
-    results = config;
-    return;
+    config = tbReadConfig('configPath', configPath);
+    
+    if isempty(config) || ~isstruct(config) || ~isfield(config, 'name')
+        results = config;
+        return;
+    end
+end
+
+%% Single out one toolbox?
+if ~isempty(name)
+    isName = strcmp(name, {config.name});
+    if ~any(isName)
+        results = config;
+        return;
+    end
+    config = config(isName);
 end
 
 %% Obtain or update the toolboxes.
