@@ -4,8 +4,9 @@
 % toolboxes via Git.
 %
 % We look for a file that tells us what toolboxes the current user
-% wants to deploy.  If not found, we copy in a default.  Then we deploy all
-% those toolboxes.
+% wants to deploy.  If not found, we copy in a default.
+%
+% This will allow the user to deploy toolboxes with tbDeployToolboxes().
 %
 % 2016 benjamin.heasly@gmail.com
 
@@ -18,16 +19,3 @@ if 7 == exist(toolboxToolboxSharedPath, 'dir')
     addpath(genpath(toolboxToolboxSharedPath));
 end
 
-%% Locate or create the user's toolbox config file.
-userConfigPath = tbHomePathToAbsolute('~/toolbox-config.json');
-if 2 ~= exist(userConfigPath, 'file');
-    % copy from standard, shared location
-    standardConfigPath = '/srv/toolbox-toolbox/toolbox-config.json';
-    if 2 == exist(standardConfigPath, 'file');
-        copyfile(standardConfigPath, userConfigPath);
-    end
-end
-
-%% Load the config and deploy the toolboxes that were caled for.
-config = tbReadConfig('configPath', userConfigPath);
-tbDeployToolboxes(config);
