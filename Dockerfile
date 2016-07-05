@@ -21,8 +21,19 @@ MAINTAINER Ben Heasly <benjamin.heasly@gmail.com>
 
 # Matlab and Python dependencies
 RUN apt-get update && apt-get install -y \
-    libpng12-dev libfreetype6-dev \
-    libblas-dev liblapack-dev gfortran build-essential xorg xorg-dev python-dev pkg-config
+    build-essential \
+    python-dev \
+    gfortran \
+    pkg-config \
+    libpng12-dev \
+    libfreetype6-dev \
+    libblas-dev \
+    liblapack-dev \
+    xorg \
+    xorg-dev \
+    nano \
+    vim \
+    emacs
 
 # Python libs
 RUN pip install pyzmq \
